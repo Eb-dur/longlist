@@ -1,13 +1,17 @@
 #ifndef CONATINER_FILE
 #define CONTAINER_FILE
 
+/*
 #include <heapapi.h>
 #include <memoryapi.h>
+#include <errhandlingapi.h>
+*/
+
+#include <Windows.h>
+
 #include <vector>
-#include <limits>
 #include <algorithm>
 #include <iostream>
-
 
 template <typename T>
 class LongLinkedList{
@@ -41,30 +45,35 @@ LongLinkedList<T>::~LongLinkedList(){
 
 template <typename T>
 void LongLinkedList<T>::insert(T item){
-    HANDLE defaulHeap = GetProcessHeap();
+    HANDLE defaultHeap = GetProcessHeap();
     std::vector<std::pair<void*,SIZE_T>> regions{};
     PROCESS_HEAP_ENTRY entry;
     entry.lpData = NULL;
-    while (HeapWalk(defaulHeap, &entry))
+    while (HeapWalk(defaultHeap, &entry))
     {   
         if (entry.wFlags & PROCESS_HEAP_ENTRY_BUSY)
             regions.push_back(std::make_pair(entry.lpData, entry.cbData));
+    }
+
+    if (GetLastError() != ERROR_NO_MORE_ITEMS) {
+        std::cerr << "HeapWalk failed." << std::endl;
+        return;
     }
 
     std::sort(regions.begin(), regions.end(), [] (const auto& l, const auto& r) { return l.first < r.first; } );
 
 
     void* put_here{nullptr};
-    unsigned int longest_distance{std::numeric_limits<unsigned int>::max()};
+    uintptr_t longest_distance{0};
 
-    for (auto it = regions.cbegin(); it != regions.cend(); it){
-        auto next = (it+1);
+    for (auto it = regions.cbegin(); it != regions.cend(); it = std::next(it)){
+        auto next = std::next(it);
         std::pair<void*, SIZE_T> first = *it;
 
         if (next != regions.cend()){
             
             std::pair<void*, SIZE_T> second = *next;
-            unsigned int distance = reinterpret_cast<uintptr_t>(second.first) - (reinterpret_cast<uintptr_t>(first.first) + first.second);
+            uintptr_t distance = reinterpret_cast<uintptr_t>(second.first) - (reinterpret_cast<uintptr_t>(first.first) + first.second);
             if ( distance > longest_distance && distance > sizeof(node)){
                 longest_distance = distance;
                 put_here = second.first - distance/2;
