@@ -8,11 +8,11 @@
 
 
 template <typename T>
-class LongLinkedList{
+class LongList{
 public:
-    LongLinkedList() = default;
-    LongLinkedList(const LongLinkedList&);
-    ~LongLinkedList();
+    LongList() = default;
+    LongList(const LongList&);
+    ~LongList();
     void insert(T);
 private:
     
@@ -28,17 +28,17 @@ private:
 };
 
 template <typename T>
-LongLinkedList<T>::LongLinkedList(const LongLinkedList& other){
+LongList<T>::LongList(const LongList& other){
 
 }
 
 template <typename T>
-LongLinkedList<T>::~LongLinkedList(){
+LongList<T>::~LongList(){
 
 }
 
 template <typename T>
-void LongLinkedList<T>::insert(T item){
+void LongList<T>::insert(T item){
     
 
     std::sort(regions.begin(), regions.end(), [] (const auto& l, const auto& r) { return l.first < r.first; } );
@@ -85,7 +85,7 @@ void LongLinkedList<T>::insert(T item){
 }
 
 int main(){
-    LongLinkedList<int> list{};
+    LongList<int> list{};
     list.insert(1);
     list.insert(2);
     list.insert(3);
