@@ -17,8 +17,23 @@
 template <typename T>
 class LongList{
 public:
+    using value_type = T;
+    using reference = T&;
+    using const_reference = const T&;
+    using size_type = unsigned int;
+    /*
+    typename C::iterator 	an iterator type 	
+        C::iterator is a LegacyForwardIterator, and its value type is T.
+        C::iterator is convertible to C::const_iterator. 
+
+    typename C::const_iterator 	a constant iterator type 	C::const_iterator is a LegacyForwardIterator, and its value type is T.
+    typename C::difference_type 	a signed integer type 	C::difference_type is the same as the difference type of C::iterator and C::const_iterator. 
+    */
     LongList() = default;
     LongList(const LongList&);
+    LongList(const LongList&&);
+    LongList<T>& operator=(const LongList&);
+    LongList<T>& operator=(const LongList&&);
     ~LongList();
     void insert(T);
 private:
@@ -28,8 +43,46 @@ private:
         node* next{nullptr};
         T data{};
     };
+
+    class iterator{
+        // https://en.cppreference.com/w/cpp/named_req/ForwardIterator
+    public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = T;
+        using difference_type = std::ptrdiff_t;
+        using pointer = T*;
+        using reference = T&;
+
+
+        iterator() = default;
+        iterator(const iterator& other) = default;
+        iterator& operator=(const iterator& other) = default;
+        ~iterator() = default;
+
+        bool operator==(const iterator& other) { return ptr == other->ptr;}
+        bool operator!=(const iterator& other) {return !(*this == other);}
+        reference operator*() { return ptr->data; }
+        pointer operator->() { return &(ptr->data); }
+        
+        iterator& operator++() { ptr = ptr->next; return *this;}
+        iterator operator++(int) {iterator old{*this}; ptr = ptr->next; return old;}
+
+
+        //iterator(node* ptr) : ptr_(ptr) {} // really needed?
+
+
+    private:
+        node* ptr{nullptr};
+
+    }
+
+    class const_iterator{
+        private:
+            node* ptr{nullptr};
+    }
     
     node* head{nullptr};
+    size_type size{0};
 
     void PrintErrorMessage(DWORD errorCode) {
         LPVOID lpMsgBuf;
@@ -47,23 +100,32 @@ private:
     }
 };
 
-template <typename T>
-LongList<T>::LongList(const LongList& other){
+template<typename T>
+LongList<T>::LongList(const LongList& other) : size{other.size}{
+
+}
+template<typename T>
+LongList<T>::LongList(const LongList&& other){
+
+}
+template<typename T>
+LongList<T>& LongList<T>::operator=(const LongList& other){
+
+}
+template<typename T>
+LongList<T>& LongList<T>::operator=(const LongList&& other){
 
 }
 
 template <typename T>
 LongList<T>::~LongList(){
-    /*node* current{head};
+    node* current{head};
     while (current != nullptr)
     {
         node* next = current->next;
         VirtualFree(current, 0, MEM_RELEASE);
         current = next;
     }
-    */
-
-
 }
 
 template <typename T>
